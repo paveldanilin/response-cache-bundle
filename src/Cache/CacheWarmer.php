@@ -1,0 +1,46 @@
+<?php
+
+namespace Pada\ResponseCacheBundle\Cache;
+
+use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
+
+
+class CacheWarmer implements CacheWarmerInterface
+{
+    private CacheableServiceInterface $cacheableService;
+    private LoggerInterface $logger;
+    private string $scanDir;
+
+    public function __construct(string $scanDir, CacheableServiceInterface $service)
+    {
+        $this->scanDir = $scanDir;
+        $this->cacheableService = $service;
+        $this->logger = new NullLogger();
+    }
+
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
+    }
+
+    public function isOptional()
+    {
+        return true;
+    }
+
+    /** @phpstan-ignore-next-line
+     * @throws \Exception
+     */
+    public function warmUp($cacheDir)
+    {
+        try {
+            $this->cacheableService->warmUpSystemCache($this->scanDir);
+        } catch (\Exception $exception) {
+            $this->logger->error('ResponseCacheBundle: could not warm cache. ' . $exception->getMessage());
+        }
+        return [];
+    }
+}

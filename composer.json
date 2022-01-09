@@ -1,0 +1,67 @@
+{
+    "name": "paveldanilin/response-cache-bundle",
+    "type": "symfony-bundle",
+    "description": "A Symfony ResponseCache Bundle",
+    "keywords": [
+        "response-cache",
+        "symfony",
+        "bundle",
+        "annotation",
+        "cacheable"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pavel",
+            "email": "pavel.k.danilin@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+		"doctrine/annotations": "1.11.*|1.12.*|1.13.*",
+        "symfony/framework-bundle": "^4.4|^5.0",
+        "symfony/console": "^4.4|^5.0",
+		"symfony/expression-language": "^4.4|^5.0",
+		"symfony/lock": "^4.4|^5.0",
+		"paveldanilin/reflection-scanner": "^0.0"
+    }
+    ,
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "phpunit/phpunit": "^9",
+        "phpstan/phpstan": "^0.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pada\\ResponseCacheBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pada\\ResponseCacheBundle\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-update-cmd": ["@bundle:clean"],
+        "bundle:clean": [
+            "php ci/rmdir.php ./config",
+            "php ci/rmdir.php ./public",
+            "php ci/rm.php ./src/Kernel.php y",
+            "php ci/rm.php ./.env y",
+            "php ci/rm.php ./.env.test y"
+        ],
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "test": [
+            "php -d memory_limit=4G ./vendor/bin/phpstan analyse -c phpstan.neon",
+            "php ./vendor/bin/phpunit"
+        ]
+    }
+}

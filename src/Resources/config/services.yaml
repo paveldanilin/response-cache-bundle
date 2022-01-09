@@ -1,0 +1,41 @@
+services:
+
+  reflection_scanner:
+    class: Pada\Reflection\Scanner\Scanner
+    arguments: [ '@annotations.reader' ]
+
+  expression_service:
+    class: Pada\ResponseCacheBundle\Service\ExpressionService
+    arguments: ['@cache.system']
+
+  key_hash_generator_service:
+    class: Pada\ResponseCacheBundle\Service\KeyHashGenerator
+    arguments: ['@expression_service']
+
+  lock_store_factory:
+    class: Pada\ResponseCacheBundle\Service\LockStoreFactory
+
+  cacheable_service:
+    class: Pada\ResponseCacheBundle\Service\CacheableService
+    arguments: ['@reflection_scanner', '@service_container', '@cache.system', '@expression_service', '@key_hash_generator_service', '@lock_store_factory']
+
+  cache_warmer:
+    class: Pada\ResponseCacheBundle\Cache\CacheWarmer
+    arguments: ['%kernel.project_dir%/src', '@cacheable_service']
+    tags:
+      - { name: kernel.cache_warmer, priority: 0 }
+
+  Pada\ResponseCacheBundle\EventListener\ControllerListener:
+    arguments: ['@cacheable_service']
+    tags:
+      - { name: kernel.event_listener, event: kernel.controller, priority: 249 }
+
+  Pada\ResponseCacheBundle\EventListener\ResponseListener:
+    arguments: ['@cacheable_service']
+    tags:
+      - { name: kernel.event_listener, event: kernel.response, priority: 249 }
+
+  Pada\ResponseCacheBundle\EventListener\ExceptionListener:
+    arguments: ['@cacheable_service']
+    tags:
+      - { name: kernel.event_listener, event: kernel.exception }
