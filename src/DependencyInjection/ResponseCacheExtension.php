@@ -14,7 +14,6 @@ class ResponseCacheExtension extends Extension
         $config = $this->processConfiguration(new Configuration(), $configs);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('response_cache.yaml');
         $loader->load('services.yaml');
 
         $cacheableDefinition = $container->getDefinition('cacheable_service');
