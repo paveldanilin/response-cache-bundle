@@ -53,6 +53,7 @@ class BundleTestCase extends TestCase
             $expressionService,
             new KeyHashGenerator($expressionService),
             new LockStoreFactory(),
+            'flock'
         );
         $this->service->setLogger($logger);
 

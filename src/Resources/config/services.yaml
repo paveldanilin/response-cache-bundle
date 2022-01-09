@@ -17,7 +17,7 @@ services:
 
   cacheable_service:
     class: Pada\ResponseCacheBundle\Service\CacheableService
-    arguments: ['@reflection_scanner', '@service_container', '@cache.system', '@expression_service', '@key_hash_generator_service', '@lock_store_factory']
+    arguments: ['@reflection_scanner', '@service_container', '@cache.system', '@expression_service', '@key_hash_generator_service', '@lock_store_factory', 'flock']
 
   response_cache_bundle_cache_warmer:
     public: true

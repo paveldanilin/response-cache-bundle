@@ -28,12 +28,12 @@ final class CacheableService extends AbstractService implements CacheableService
                                 ExpressionRequestAwareInterface $expressionRequestAware,
                                 KeyHashGeneratorInterface $keyHashGenerator,
                                 LockStoreFactoryInterface $lockStoreFactory,
-                                ?string $lockStoreDsn = null)
+                                string $lockStoreDsn)
     {
         parent::__construct($metaScanner, $cacheSystem, $container);
         $this->expressionRequestAware = $expressionRequestAware;
         $this->keyHashGenerator = $keyHashGenerator;
-        $this->lockFactory = new LockFactory($lockStoreFactory->create($lockStoreDsn ?? 'flock'));
+        $this->lockFactory = new LockFactory($lockStoreFactory->create($lockStoreDsn ));
     }
 
     public function processEvent($controller, string $method, ControllerEvent $event): void
