@@ -63,7 +63,7 @@ final class CacheableService extends AbstractService implements CacheableService
 
         if ($cacheItem->isHit()) {
             // Replace controller handler
-            $event->setController(fn($cachedItem) => $this->createResponseFromCacheItem($cacheItem));
+            $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem));
             $this->getLogger()->debug('A response has been created from cache.');
             return;
         }
