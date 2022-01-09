@@ -1,0 +1,3 @@
+response_cache:
+  lock:
+    store: 'flock'
