@@ -17,6 +17,6 @@ class ResponseCacheExtension extends Extension
         $loader->load('services.yaml');
 
         $cacheableDefinition = $container->getDefinition('cacheable_service');
-        $cacheableDefinition->replaceArgument(6, $config['lock']['store'] ?? null);
+        $cacheableDefinition->replaceArgument(6, $config['lock']['store'] ?? 'flock');
     }
 }
