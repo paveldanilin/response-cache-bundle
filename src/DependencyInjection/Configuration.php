@@ -20,6 +20,12 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('store')->end()
                     ->end()
                 ->end() // lock
+                ->arrayNode('controller')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('dir')->defaultValue('%kernel.project_dir%/src')->end()
+                    ->end()
+                ->end() // controller
             ->end();
 
         return $treeBuilder;
