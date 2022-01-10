@@ -34,31 +34,19 @@
     },
     "autoload": {
         "psr-4": {
-            "Pada\\ResponseCacheBundle\\": "src/"
-        }
+            "Pada\\ResponseCacheBundle\\": ""
+        },
+		"exclude-from-classmap": ["/Tests/"]
     },
     "autoload-dev": {
         "psr-4": {
-            "Pada\\ResponseCacheBundle\\Tests\\": "tests"
+            "Pada\\ResponseCacheBundle\\Tests\\": "Tests"
         }
     },
     "config": {
-        "preferred-install": "dist",
         "sort-packages": true
     },
     "scripts": {
-        "post-update-cmd": ["@bundle:clean"],
-        "bundle:clean": [
-            "php ci/rmdir.php ./config",
-            "php ci/rmdir.php ./public",
-            "php ci/rm.php ./src/Kernel.php y",
-            "php ci/rm.php ./.env y",
-            "php ci/rm.php ./.env.test y"
-        ],
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        },
         "test": [
             "php -d memory_limit=4G ./vendor/bin/phpstan analyse -c phpstan.neon",
             "php ./vendor/bin/phpunit"

@@ -5,7 +5,6 @@ symfony.lock
 ###> symfony/framework-bundle ###
 /config
 /public
-/src/Kernel.php
 /.env
 /.env.local
 /.env.local.php

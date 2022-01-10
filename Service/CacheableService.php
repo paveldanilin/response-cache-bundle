@@ -33,7 +33,7 @@ final class CacheableService extends AbstractService implements CacheableService
         parent::__construct($metaScanner, $cacheSystem, $container);
         $this->expressionRequestAware = $expressionRequestAware;
         $this->keyHashGenerator = $keyHashGenerator;
-        $this->lockFactory = new LockFactory($lockStoreFactory->create($lockStoreDsn ));
+        $this->lockFactory = new LockFactory($lockStoreFactory->create($lockStoreDsn));
     }
 
     public function processEvent($controller, string $method, ControllerEvent $event): void
@@ -171,6 +171,8 @@ final class CacheableService extends AbstractService implements CacheableService
 
         if ($this->keyHashGenerator->isKeyDynamic($cacheable->key)) {
             $this->expressionRequestAware->evaluateOnRequest($this->keyHashGenerator->normalize($cacheable->key), new Request());
+        } else if (empty($cacheable->key)) {
+            $cacheable->key = $classInfo->getReflection()->getName() . '_' . $methodName;
         }
 
         if (!empty($cacheable->condition)) {

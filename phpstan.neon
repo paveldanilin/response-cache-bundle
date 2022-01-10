@@ -1,6 +1,10 @@
 parameters:
     level: 6
     paths:
-        - src
+        - Cache/
+        - Controller/
+        - DependencyInjection/
+        - EventListener/
+        - Service/
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
