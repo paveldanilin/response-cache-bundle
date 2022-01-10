@@ -23,14 +23,20 @@ class ResponseCacheExtension extends Extension
         $cacheWarmer->replaceArgument(0, $config['controller']['dir']);
         $cacheWarmer->addMethodCall('setLogger', [new Reference('logger')]);
 
-        if ($container->has($config['lock']['factory'] ?? '')) {
-            $lockResponseCacheFactory = $container->get($config['lock']['factory']);
-        } else {
-            $lockResponseCacheFactory = new LockFactory(new FlockStore());
+
+        $lockResponseCacheStoreId = 'lock.response.cache.store';
+        if (!$container->has($lockResponseCacheStoreId)) {
+            $container->register($lockResponseCacheStoreId, FlockStore::class);
+        }
+
+        $lockResponseCacheFactoryId = $config['lock']['factory'] ?? 'lock.response.cache.factory';
+        if (!$container->has($lockResponseCacheFactoryId)) {
+            $container->register($lockResponseCacheFactoryId, LockFactory::class)
+                ->setArgument(0, new Reference($lockResponseCacheStoreId));
         }
 
         $cacheableDefinition = $container->getDefinition('cacheable_service');
-        $cacheableDefinition->replaceArgument(5, $lockResponseCacheFactory);
+        $cacheableDefinition->replaceArgument(5, new Reference($lockResponseCacheFactoryId));
         $cacheableDefinition->addMethodCall('setLogger', [new Reference('logger')]);
     }
 }
