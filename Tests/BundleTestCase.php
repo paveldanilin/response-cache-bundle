@@ -11,7 +11,6 @@ use Pada\ResponseCacheBundle\Service\CacheableService;
 use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
 use Pada\ResponseCacheBundle\Service\ExpressionService;
 use Pada\ResponseCacheBundle\Service\KeyHashGenerator;
-use Pada\ResponseCacheBundle\Service\LockStoreFactory;
 use PHPStan\Testing\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -21,6 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 
 class BundleTestCase extends TestCase
 {
@@ -52,8 +53,7 @@ class BundleTestCase extends TestCase
             $this->cacheSystem,
             $expressionService,
             new KeyHashGenerator($expressionService),
-            new LockStoreFactory(),
-            'flock'
+            new LockFactory(new SemaphoreStore()),
         );
         $this->service->setLogger($logger);
 

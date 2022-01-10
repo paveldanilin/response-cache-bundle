@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('lock')
                     ->children()
-                        ->scalarNode('store')->end()
+                        ->scalarNode('factory')->defaultValue('lock.response.cache.factory')->end()
                     ->end()
                 ->end() // lock
                 ->arrayNode('controller')

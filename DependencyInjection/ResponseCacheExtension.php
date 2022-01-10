@@ -7,6 +7,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 class ResponseCacheExtension extends Extension
 {
@@ -19,9 +21,16 @@ class ResponseCacheExtension extends Extension
 
         $cacheWarmer = $container->getDefinition('response_cache_bundle_cache_warmer');
         $cacheWarmer->replaceArgument(0, $config['controller']['dir']);
+        $cacheWarmer->addMethodCall('setLogger', [new Reference('logger')]);
+
+        if ($container->has($config['lock']['factory'] ?? '')) {
+            $lockResponseCacheFactory = $container->get($config['lock']['factory']);
+        } else {
+            $lockResponseCacheFactory = new LockFactory(new FlockStore());
+        }
 
         $cacheableDefinition = $container->getDefinition('cacheable_service');
-        $cacheableDefinition->replaceArgument(6, $config['lock']['store'] ?? 'flock');
+        $cacheableDefinition->replaceArgument(5, $lockResponseCacheFactory);
         $cacheableDefinition->addMethodCall('setLogger', [new Reference('logger')]);
     }
 }
