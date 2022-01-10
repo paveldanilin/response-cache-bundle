@@ -10,7 +10,7 @@ class Configuration implements ConfigurationInterface
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('response_cache');
+        $treeBuilder = new TreeBuilder('pada_response_cache');
 
         /** @phpstan-ignore-next-line */
         $treeBuilder->getRootNode()
