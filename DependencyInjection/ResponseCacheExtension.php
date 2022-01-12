@@ -25,12 +25,12 @@ class ResponseCacheExtension extends Extension
 
 
         $lockResponseCacheStoreId = 'lock.response.cache.store';
-        if (!$container->has($lockResponseCacheStoreId)) {
+        if (!$container->hasDefinition($lockResponseCacheStoreId)) {
             $container->register($lockResponseCacheStoreId, FlockStore::class);
         }
 
         $lockResponseCacheFactoryId = $config['lock']['factory'] ?? 'lock.response.cache.factory';
-        if (!$container->has($lockResponseCacheFactoryId)) {
+        if (!$container->hasDefinition($lockResponseCacheFactoryId)) {
             $container->register($lockResponseCacheFactoryId, LockFactory::class)
                 ->setArgument(0, new Reference($lockResponseCacheStoreId));
         }
