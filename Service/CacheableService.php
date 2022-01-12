@@ -51,7 +51,7 @@ final class CacheableService extends AbstractService implements CacheableService
     {
         // Skip processing if whether a cacheable is null or condition does not match
         if (null === $cacheable || !$this->requestMatchesCondition($cacheable->condition, $event->getRequest())) {
-            $this->getLogger()->debug('A method is not @Cacheable, skip processing.');
+            $this->getLogger()->debug('A method is not @Cacheable or does not match to condition, skip processing.');
             return;
         }
 
@@ -59,13 +59,14 @@ final class CacheableService extends AbstractService implements CacheableService
 
         $keyHash = $this->keyHashGenerator->generate($cacheable->key, $event->getRequest());
 
+        $startCacheOperations = \microtime(true); // @see createResponseFromCacheItem
         $pool = $this->findPool($cacheable->pool);
         $cacheItem = $pool->getItem($keyHash);
 
         if ($cacheItem->isHit()) {
             // Replace controller handler
-            $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem));
-            $this->getLogger()->debug('A response has been created from cache.');
+            $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem, $startCacheOperations));
+            $this->getLogger()->debug('A response has been created from the cache.');
             return;
         }
 
@@ -75,7 +76,7 @@ final class CacheableService extends AbstractService implements CacheableService
     public function updateCacheIfNeeded(ResponseEvent $event): void
     {
         if (!$this->shouldUpdateCache($event)) {
-            $this->getLogger()->debug('A cacheable value should not been updated');
+            $this->getLogger()->debug('A cacheable value should not be updated.');
             $this->releaseLockIfNeeded($event->getRequest());
             return;
         }
@@ -111,6 +112,7 @@ final class CacheableService extends AbstractService implements CacheableService
             $lock = $request->attributes->get(Cacheable::REQUEST_LOCK);
             $lock->release();
             $request->attributes->remove(Cacheable::REQUEST_LOCK);
+            $this->getLogger()->debug('The lock has been released.');
         }
     }
 
@@ -133,23 +135,26 @@ final class CacheableService extends AbstractService implements CacheableService
     {
         $lock = $this->lockFactory->createLock($keyHash, 30, false);
         if ($lock->acquire(false)) {
-            $this->getLogger()->debug('A lock has been created for a cache value computation.');
+            $this->getLogger()->debug('A lock has been created for a cache value computation.', ['key' => $keyHash]);
             $request->attributes->set(Cacheable::REQUEST_LOCK, $lock);
             $request->attributes->set(Cacheable::REQUEST_POOL_SERVICE, $pool);
             $request->attributes->set(Cacheable::REQUEST_CACHED_ITEM, $cacheItem);
             $request->attributes->set(Cacheable::REQUEST_ATTRIBUTE, $cacheable);
         } else {
-            $this->getLogger()->debug('Could not create a lock for a cache computation.');
+            $this->getLogger()->debug('Could not create a lock for a cache computation.', ['key' => $keyHash]);
         }
     }
 
-    private function createResponseFromCacheItem(CacheItemInterface $cacheItem): Response
+    private function createResponseFromCacheItem(CacheItemInterface $cacheItem, float $startCacheOperations): Response
     {
         $cachedResponse = $cacheItem->get();
+        $cacheOperationsTime = \microtime(true) - $startCacheOperations;
+        $this->getLogger()
+            ->debug(\sprintf('Reading the cacheable value from the cache took %f seconds', $cacheOperationsTime));
         return new Response(
-            $cachedResponse['content'],
-            $cachedResponse['status_code'],
-            $cachedResponse['headers']
+            $cachedResponse['content'] ?? '',
+            $cachedResponse['status_code'] ?? 200,
+            $cachedResponse['headers'] ?? [],
         );
     }
 
