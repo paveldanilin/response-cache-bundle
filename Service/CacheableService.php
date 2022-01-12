@@ -50,10 +50,12 @@ final class CacheableService extends AbstractService implements CacheableService
     private function doProcessEvent(?Cacheable $cacheable, ControllerEvent $event): void
     {
         // Skip processing if whether a cacheable is null or condition does not match
-        if (null === $cacheable || !$this->matchCondition($cacheable->condition, $event->getRequest())) {
+        if (null === $cacheable || !$this->requestMatchesCondition($cacheable->condition, $event->getRequest())) {
             $this->getLogger()->debug('A method is not @Cacheable, skip processing.');
             return;
         }
+
+        $this->lockFactory->setLogger($this->getLogger());
 
         $keyHash = $this->keyHashGenerator->generate($cacheable->key, $event->getRequest());
 
@@ -112,7 +114,7 @@ final class CacheableService extends AbstractService implements CacheableService
         }
     }
 
-    private function matchCondition(?string $condition, Request $request): bool
+    private function requestMatchesCondition(?string $condition, Request $request): bool
     {
         if (null === $condition) {
             return true;
