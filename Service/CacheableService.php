@@ -68,7 +68,9 @@ final class CacheableService extends AbstractService implements CacheableService
         if ($cacheItem->isHit()) {
             // Replace controller handler
             $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem, $startCacheOperations));
-            $this->getLogger()->debug('A response has been created from the cache.');
+            $this->getLogger()->debug('A response has been created from the cache, key={key}.', [
+                'key' => $keyHash,
+            ]);
             return;
         }
 
@@ -163,7 +165,8 @@ final class CacheableService extends AbstractService implements CacheableService
         $cachedResponse = $cacheItem->get();
         $cacheOperationsTime = \microtime(true) - $startCacheOperations;
         $this->getLogger()
-            ->debug(\sprintf('Reading the cacheable value from the cache took %f seconds', $cacheOperationsTime));
+            ->debug('Reading the cacheable value from the cache took {took} seconds, key={key}',
+                ['took' => $cacheOperationsTime, 'key' => $cacheItem->getKey()]);
         return new Response(
             $cachedResponse['content'] ?? '',
             $cachedResponse['status_code'] ?? 200,
