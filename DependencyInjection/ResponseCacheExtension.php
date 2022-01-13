@@ -43,5 +43,8 @@ class ResponseCacheExtension extends Extension implements CompilerPassInterface
         $cacheableDefinition = $container->getDefinition('response_cache_bundle_cacheable_service');
         $cacheableDefinition->replaceArgument(5, new Reference($lockResponseCacheFactoryId));
         $cacheableDefinition->addMethodCall('setLogger', [new Reference('logger')]);
+
+        $evictDefinition = $container->getDefinition('response_cache_bundle_evict_service');
+        $evictDefinition->addMethodCall('setLogger', [new Reference('logger')]);
     }
 }
