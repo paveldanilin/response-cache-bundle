@@ -107,12 +107,12 @@ final class CacheableService extends AbstractService implements CacheableService
         if ($pool->save($cachedItem)) {
             $this->getLogger()->debug(
                 'A cacheable value has been persisted to cache, key={key}.',
-                ['key' => $cacheable->key]
+                ['key' => $cachedItem->getKey()]
             );
         } else {
             $this->getLogger()->error(
                 'Could not persist cacheable value to cache, key={key}.',
-                ['key' => $cacheable->key]
+                ['key' => $cachedItem->getKey()]
             );
         }
 
