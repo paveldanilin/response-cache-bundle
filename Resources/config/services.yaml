@@ -54,12 +54,12 @@ services:
   Pada\ResponseCacheBundle\EventListener\ControllerListener:
     arguments: ['@response_cache_bundle_cacheable_service', '@response_cache_bundle_evict_service']
     tags:
-      - { name: kernel.event_listener, event: kernel.controller, priority: 249 }
+      - { name: kernel.event_listener, event: kernel.controller, priority: 1500 }
 
   Pada\ResponseCacheBundle\EventListener\ResponseListener:
     arguments: ['@response_cache_bundle_cacheable_service']
     tags:
-      - { name: kernel.event_listener, event: kernel.response, priority: 249 }
+      - { name: kernel.event_listener, event: kernel.response, priority: 1500 }
 
   Pada\ResponseCacheBundle\EventListener\ExceptionListener:
     arguments: ['@response_cache_bundle_cacheable_service']
