@@ -14,25 +14,26 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
+use Symfony\Component\Lock\Store\FlockStore;
 
 
 final class CacheableService extends AbstractService implements CacheableServiceInterface
 {
     private LockFactory $lockFactory;
-    private ExpressionRequestAwareInterface $expressionRequestAware;
-    private KeyHashGeneratorInterface $keyHashGenerator;
+    private ExpressionServiceInterface $expressionService;
+    private KeyGeneratorInterface $keyGenerator;
 
-    public function __construct(ScannerInterface $metaScanner,
-                                ContainerInterface $container,
-                                CacheItemPoolInterface $cacheSystem,
-                                ExpressionRequestAwareInterface $expressionRequestAware,
-                                KeyHashGeneratorInterface $keyHashGenerator,
-                                LockFactory $lockFactory)
+    public function __construct(ScannerInterface           $metaScanner,
+                                ContainerInterface         $container,
+                                CacheItemPoolInterface     $cacheSystem,
+                                ExpressionServiceInterface $expressionService,
+                                KeyGeneratorInterface      $keyGenerator,
+                                ?LockFactory               $lockFactory)
     {
         parent::__construct($metaScanner, $cacheSystem, $container);
-        $this->expressionRequestAware = $expressionRequestAware;
-        $this->keyHashGenerator = $keyHashGenerator;
-        $this->lockFactory = $lockFactory;
+        $this->expressionService = $expressionService;
+        $this->keyGenerator = $keyGenerator;
+        $this->lockFactory = $lockFactory ?? new LockFactory(new FlockStore());
     }
 
     public function processEvent($controller, string $method, ControllerEvent $event): void
@@ -51,13 +52,14 @@ final class CacheableService extends AbstractService implements CacheableService
     {
         // Skip processing if whether a cacheable is null or condition does not match
         if (null === $cacheable || !$this->requestMatchesCondition($cacheable->condition, $event->getRequest())) {
-            $this->getLogger()->debug('A method is not @Cacheable or does not match to condition, skip processing.');
+            $this->getLogger()
+                ->debug('A method is not @Cacheable or does not match to condition, skip processing.');
             return;
         }
 
         $this->lockFactory->setLogger($this->getLogger());
 
-        $keyHash = $this->keyHashGenerator->generate($cacheable->key, $event->getRequest());
+        $keyHash = $this->keyGenerator->generate($cacheable->key, $event->getRequest());
 
         $startCacheOperations = \microtime(true); // @see createResponseFromCacheItem
         $pool = $this->findPool($cacheable->pool);
@@ -100,7 +102,17 @@ final class CacheableService extends AbstractService implements CacheableService
             'content' => $event->getResponse()->getContent()
         ]);
 
-        $pool->save($cachedItem);
+        if ($pool->save($cachedItem)) {
+            $this->getLogger()->debug(
+                'A cacheable value has been persisted to cache, key={key}.',
+                ['key' => $cacheable->key]
+            );
+        } else {
+            $this->getLogger()->error(
+                'Could not persist cacheable value to cache, key={key}.',
+                ['key' => $cacheable->key]
+            );
+        }
 
         $this->releaseLockIfNeeded($event->getRequest());
     }
@@ -121,7 +133,7 @@ final class CacheableService extends AbstractService implements CacheableService
         if (null === $condition) {
             return true;
         }
-        return (bool)$this->expressionRequestAware->evaluateOnRequest($condition, $request);
+        return (bool)$this->expressionService->evaluateOnRequest($condition, $request);
     }
 
     private function shouldUpdateCache(ResponseEvent $event): bool
@@ -135,7 +147,8 @@ final class CacheableService extends AbstractService implements CacheableService
     {
         $lock = $this->lockFactory->createLock($keyHash, 30, false);
         if ($lock->acquire(false)) {
-            $this->getLogger()->debug('A lock has been created for a cache value computation.', ['key' => $keyHash]);
+            $this->getLogger()
+                ->debug('A lock has been created for a cache value computation.', ['key' => $keyHash]);
             $request->attributes->set(Cacheable::REQUEST_LOCK, $lock);
             $request->attributes->set(Cacheable::REQUEST_POOL_SERVICE, $pool);
             $request->attributes->set(Cacheable::REQUEST_CACHED_ITEM, $cacheItem);
@@ -175,14 +188,14 @@ final class CacheableService extends AbstractService implements CacheableService
             return;
         }
 
-        if ($this->keyHashGenerator->isKeyDynamic($cacheable->key)) {
-            $this->expressionRequestAware->evaluateOnRequest($this->keyHashGenerator->normalize($cacheable->key), new Request());
+        if ($this->keyGenerator->isKeyDynamic($cacheable->key)) {
+            $this->expressionService->evaluateOnRequest($this->keyGenerator->normalize($cacheable->key), new Request());
         } else if (empty($cacheable->key)) {
             $cacheable->key = $classInfo->getReflection()->getName() . '_' . $methodName;
         }
 
         if (!empty($cacheable->condition)) {
-            $this->expressionRequestAware->evaluateOnRequest($cacheable->condition, new Request());
+            $this->expressionService->evaluateOnRequest($cacheable->condition, new Request());
         }
 
         $this->systemMetaCachePut($classInfo, $methodName, $cacheable);

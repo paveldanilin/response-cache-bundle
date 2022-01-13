@@ -4,7 +4,7 @@ namespace Pada\ResponseCacheBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
 
-interface KeyHashGeneratorInterface
+interface KeyGeneratorInterface
 {
     public function isKeyDynamic(string $key): bool;
     public function normalize(string $key): string;

@@ -9,8 +9,10 @@ use Pada\ResponseCacheBundle\EventListener\ControllerListener;
 use Pada\ResponseCacheBundle\EventListener\ResponseListener;
 use Pada\ResponseCacheBundle\Service\CacheableService;
 use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
+use Pada\ResponseCacheBundle\Service\EvictService;
+use Pada\ResponseCacheBundle\Service\EvictServiceInterface;
 use Pada\ResponseCacheBundle\Service\ExpressionService;
-use Pada\ResponseCacheBundle\Service\KeyHashGenerator;
+use Pada\ResponseCacheBundle\Service\KeyGenerator;
 use PHPStan\Testing\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -30,7 +32,8 @@ class BundleTestCase extends TestCase
 
     protected ArrayAdapter $cacheSystem;
     protected ArrayAdapter $cacheApp;
-    protected CacheableServiceInterface $service;
+    protected CacheableServiceInterface $cacheableService;
+    protected EvictServiceInterface $evictService;
     protected ControllerListener $controllerCacheListener;
     protected ResponseListener $responseCacheListener;
 
@@ -47,23 +50,33 @@ class BundleTestCase extends TestCase
         ]);
         $logger = new ConsoleLogger(new ConsoleOutput());
         $expressionService = new ExpressionService($this->cacheSystem);
-        $this->service = new CacheableService(
-            new Scanner(),
+        $metaScanner = new Scanner();
+
+        $this->cacheableService = new CacheableService(
+            $metaScanner,
             $container,
             $this->cacheSystem,
             $expressionService,
-            new KeyHashGenerator($expressionService),
+            new KeyGenerator($expressionService),
             new LockFactory(new SemaphoreStore()),
         );
-        $this->service->setLogger($logger);
+        $this->cacheableService->setLogger($logger);
+
+        $this->evictService = new EvictService(
+            $metaScanner,
+            $container,
+            $this->cacheSystem,
+            new KeyGenerator($expressionService)
+        );
+        $this->evictService->setLogger($logger);
 
         $dir = getcwd() . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'Fixtures';
-        $warmer = new CacheWarmer($dir, $this->service);
+        $warmer = new CacheWarmer($dir, $this->cacheableService, $this->evictService);
         $warmer->setLogger($logger);
         $warmer->warmUp('');
 
-        $this->controllerCacheListener = new ControllerListener($this->service);
-        $this->responseCacheListener = new ResponseListener($this->service);
+        $this->controllerCacheListener = new ControllerListener($this->cacheableService, $this->evictService);
+        $this->responseCacheListener = new ResponseListener($this->cacheableService);
     }
 
     protected function createRequest(string $uri, string $method = 'GET', array $params = [], ?string $content = null, array $headers = []): Request

@@ -74,6 +74,19 @@ class ControllerCacheListenerTest extends BundleTestCase
         self::assertArrayHasKey(\md5('cached_data_with_condition'), $this->cacheApp->getValues());
     }
 
+    public function testEvictCacheData(): void
+    {
+        $key = \md5('ABCD');
+
+        // Create ABCD key in cache
+        $this->invokeMethod('/api/v1/data/static/key?a=1', 'GET', 'createABCDKey');
+        self::assertArrayHasKey($key, $this->cacheApp->getValues());
+
+        // Evict ABCD key from cache
+        $this->invokeMethod('/api/v1/data/static/key?a=1', 'GET', 'evictABCDKey');
+        self::assertArrayNotHasKey($key, $this->cacheApp->getValues());
+    }
+
     private function invokeMethod(string $uri, string $httpMethod, string $controllerMethod): void
     {
         $request = $this->createRequest($uri, $httpMethod);

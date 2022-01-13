@@ -4,11 +4,11 @@ namespace Pada\ResponseCacheBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
 
-final class KeyHashGenerator implements KeyHashGeneratorInterface
+final class KeyGenerator implements KeyGeneratorInterface
 {
-    private ExpressionRequestAwareInterface $expression;
+    private ExpressionServiceInterface $expression;
 
-    public function __construct(ExpressionRequestAwareInterface $expression)
+    public function __construct(ExpressionServiceInterface $expression)
     {
         $this->expression = $expression;
     }

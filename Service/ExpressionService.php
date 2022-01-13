@@ -6,7 +6,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\Request;
 
-final class ExpressionService implements ExpressionInterface, ExpressionRequestAwareInterface
+final class ExpressionService implements ExpressionServiceInterface
 {
     private CacheItemPoolInterface $cacheSystem;
     private ?ExpressionLanguage $expressionLanguage = null;

@@ -3,6 +3,7 @@
 namespace Pada\ResponseCacheBundle\Tests\Fixtures;
 
 use Pada\ResponseCacheBundle\Controller\Annotation\Cacheable;
+use Pada\ResponseCacheBundle\Controller\Annotation\CacheEvict;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -61,6 +62,24 @@ class TestController
      * @return Response
      */
     public function cacheIfMethodNotPut(): Response
+    {
+        return new Response('DATA', 200);
+    }
+
+    /**
+     * @Cacheable(key="ABCD")
+     * @return Response
+     */
+    public function createABCDKey(): Response
+    {
+        return new Response('DATA', 201);
+    }
+
+    /**
+     * @CacheEvict(key="ABCD")
+     * @return Response
+     */
+    public function evictABCDKey(): Response
     {
         return new Response('DATA', 200);
     }

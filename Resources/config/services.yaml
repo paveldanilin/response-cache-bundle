@@ -1,42 +1,67 @@
 services:
 
-  reflection_scanner:
+  response_cache_bundle_reflection_scanner:
     class: Pada\Reflection\Scanner\Scanner
     arguments: [ '@annotations.reader' ]
 
-  expression_service:
+  response_cache_bundle_expression_service:
     class: Pada\ResponseCacheBundle\Service\ExpressionService
     arguments: ['@cache.system']
 
-  key_hash_generator_service:
-    class: Pada\ResponseCacheBundle\Service\KeyHashGenerator
-    arguments: ['@expression_service']
+  response_cache_bundle_key_generator_service:
+    class: Pada\ResponseCacheBundle\Service\KeyGenerator
+    arguments: ['@response_cache_bundle_expression_service']
 
-  lock_store_factory:
-    class: Pada\ResponseCacheBundle\Service\LockStoreFactory
-
-  cacheable_service:
+  # ---
+  # Cacheable Service
+  response_cache_bundle_cacheable_service:
     class: Pada\ResponseCacheBundle\Service\CacheableService
-    arguments: ['@reflection_scanner', '@service_container', '@cache.system', '@expression_service', '@key_hash_generator_service', '@lock_store_factory', 'flock']
+    arguments: [
+        '@response_cache_bundle_reflection_scanner',
+        '@service_container',
+        '@cache.system',
+        '@response_cache_bundle_expression_service',
+        '@response_cache_bundle_key_generator_service',
+        null
+    ]
 
+  # ---
+  # Evict Service
+  response_cache_bundle_evict_service:
+    class: Pada\ResponseCacheBundle\Service\EvictService
+    arguments: [
+        '@response_cache_bundle_reflection_scanner',
+        '@service_container',
+        '@cache.system',
+        '@response_cache_bundle_key_generator_service'
+    ]
+
+  # ---
+  # Cache Warmer
   response_cache_bundle_cache_warmer:
     public: true
     class: Pada\ResponseCacheBundle\Cache\CacheWarmer
-    arguments: ['%kernel.project_dir%/src', '@cacheable_service']
+    arguments: [
+        '%kernel.project_dir%/src',
+        '@response_cache_bundle_cacheable_service',
+        '@response_cache_bundle_evict_service'
+    ]
     tags:
       - { name: kernel.cache_warmer, priority: 0 }
 
+  # ---
+  # Event listeners
   Pada\ResponseCacheBundle\EventListener\ControllerListener:
-    arguments: ['@cacheable_service']
+    arguments: ['@response_cache_bundle_cacheable_service']
     tags:
       - { name: kernel.event_listener, event: kernel.controller, priority: 249 }
 
   Pada\ResponseCacheBundle\EventListener\ResponseListener:
-    arguments: ['@cacheable_service']
+    arguments: ['@response_cache_bundle_cacheable_service']
     tags:
       - { name: kernel.event_listener, event: kernel.response, priority: 249 }
 
   Pada\ResponseCacheBundle\EventListener\ExceptionListener:
-    arguments: ['@cacheable_service']
+    arguments: ['@response_cache_bundle_cacheable_service']
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
