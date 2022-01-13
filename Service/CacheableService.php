@@ -193,8 +193,6 @@ final class CacheableService extends AbstractService implements CacheableService
 
         if ($this->keyGenerator->isKeyDynamic($cacheable->key)) {
             $this->expressionService->evaluateOnRequest($this->keyGenerator->normalize($cacheable->key), new Request());
-        } else if (empty($cacheable->key)) {
-            $cacheable->key = $classInfo->getReflection()->getName() . '_' . $methodName;
         }
 
         if (!empty($cacheable->condition)) {

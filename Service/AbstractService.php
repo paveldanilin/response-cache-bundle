@@ -4,6 +4,7 @@ namespace Pada\ResponseCacheBundle\Service;
 
 use Pada\Reflection\Scanner\ClassInfo;
 use Pada\Reflection\Scanner\ScannerInterface;
+use Pada\ResponseCacheBundle\Controller\Annotation\AbstractAnnotation;
 use Pada\ResponseCacheBundle\Controller\Annotation\Cacheable;
 use Pada\ResponseCacheBundle\Controller\Annotation\CacheEvict;
 use Psr\Cache\CacheItemPoolInterface;
@@ -71,13 +72,11 @@ abstract class AbstractService
         return null;
     }
 
-    /**
-     * @param ClassInfo $classInfo
-     * @param string $methodName
-     * @param Cacheable|CacheEvict $annotation
-     */
-    protected function systemMetaCachePut(ClassInfo $classInfo, string $methodName, $annotation): void
+    protected function systemMetaCachePut(ClassInfo $classInfo, string $methodName, AbstractAnnotation $annotation): void
     {
+        if (empty($annotation->key)) {
+            $annotation->key = $classInfo->getReflection()->getName() . '_' . $methodName;
+        }
         $key = self::getCacheKey($classInfo->getReflection()->getName(), $methodName, \get_class($annotation));
         $cachedItem = $this->cacheSystem->getItem($key);
         $cachedItem->set($annotation);
