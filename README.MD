@@ -21,11 +21,9 @@ response_cache:
     dir: '%kernel.project_dir%/src'
 ```
 
-A lock factory service, [read more](https://symfony.com/doc/current/components/lock.html) about lock component configuration:
-`lock.factory: 'lock.response_cache.factory'`
+`lock.factory`: A lock factory service, [read more](https://symfony.com/doc/current/components/lock.html) about lock component configuration.
 
-A controller directory for annotation scan:
-`controller.dir: '%kernel.project_dir%/src'`
+`controller.dir`: A controller directory for annotation scan.
 
 
 ## Usage
@@ -41,11 +39,11 @@ The default parameters:
 - `condition` - null
 
 ```php
-    /**
-     * @Cacheable()
-     * @Route("/api/v1/work", methods={"GET"}, name="do.work")
-     * @return JsonResponse
-     */
+/**
+  * @Cacheable()
+  * @Route("/api/v1/work", methods={"GET"}, name="do.work")
+  * @return JsonResponse
+  */
 public function doWork(Request $request): JsonResponse
 {
     $data = doHeavyComputations();
