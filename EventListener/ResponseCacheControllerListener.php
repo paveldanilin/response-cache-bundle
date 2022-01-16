@@ -8,7 +8,7 @@ use Pada\ResponseCacheBundle\Service\EvictServiceInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 
-class ControllerListener
+class ResponseCacheControllerListener
 {
     private CacheableServiceInterface $cacheableService;
     private EvictServiceInterface $evictService;

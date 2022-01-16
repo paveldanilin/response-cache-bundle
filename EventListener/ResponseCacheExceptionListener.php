@@ -5,7 +5,7 @@ namespace Pada\ResponseCacheBundle\EventListener;
 use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
-class ExceptionListener
+class ResponseCacheExceptionListener
 {
     private CacheableServiceInterface $cacheableService;
 

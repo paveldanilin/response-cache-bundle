@@ -6,7 +6,7 @@ namespace Pada\ResponseCacheBundle\EventListener;
 use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-class ResponseListener
+class ResponseCacheResponseListener
 {
     private CacheableServiceInterface $cacheableService;
 

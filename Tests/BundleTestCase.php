@@ -5,8 +5,8 @@ namespace Pada\ResponseCacheBundle\Tests;
 use Pada\Reflection\Scanner\Scanner;
 use Pada\ResponseCacheBundle\Cache\CacheWarmer;
 use Pada\ResponseCacheBundle\Controller\Annotation\AbstractAnnotation;
-use Pada\ResponseCacheBundle\EventListener\ControllerListener;
-use Pada\ResponseCacheBundle\EventListener\ResponseListener;
+use Pada\ResponseCacheBundle\EventListener\ResponseCacheControllerListener;
+use Pada\ResponseCacheBundle\EventListener\ResponseCacheResponseListener;
 use Pada\ResponseCacheBundle\Service\CacheableService;
 use Pada\ResponseCacheBundle\Service\CacheableServiceInterface;
 use Pada\ResponseCacheBundle\Service\EvictService;
@@ -34,8 +34,8 @@ class BundleTestCase extends TestCase
     protected ArrayAdapter $cacheApp;
     protected CacheableServiceInterface $cacheableService;
     protected EvictServiceInterface $evictService;
-    protected ControllerListener $controllerCacheListener;
-    protected ResponseListener $responseCacheListener;
+    protected ResponseCacheControllerListener $controllerCacheListener;
+    protected ResponseCacheResponseListener $responseCacheListener;
 
     protected function init(): void
     {
@@ -75,8 +75,8 @@ class BundleTestCase extends TestCase
         $warmer->setLogger($logger);
         $warmer->warmUp('');
 
-        $this->controllerCacheListener = new ControllerListener($this->cacheableService, $this->evictService);
-        $this->responseCacheListener = new ResponseListener($this->cacheableService);
+        $this->controllerCacheListener = new ResponseCacheControllerListener($this->cacheableService, $this->evictService);
+        $this->responseCacheListener = new ResponseCacheResponseListener($this->cacheableService);
     }
 
     protected function createRequest(string $uri, string $method = 'GET', array $params = [], ?string $content = null, array $headers = []): Request
