@@ -67,10 +67,12 @@ final class CacheableService extends AbstractService implements CacheableService
 
         if ($cacheItem->isHit()) {
             // Replace controller handler
-            $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem, $startCacheOperations));
-            $this->getLogger()->debug('A response has been created from the cache, key={key}.', [
-                'key' => $keyHash,
-            ]);
+            $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem, $cacheable, $startCacheOperations));
+            $this->getLogger()
+                ->debug('A response has been created from the cache. pool={pool}; key={key};', [
+                    'key' => $keyHash,
+                    'pool' => $cacheable->pool,
+                ]);
             return;
         }
 
@@ -99,21 +101,23 @@ final class CacheableService extends AbstractService implements CacheableService
         }
 
         $cachedItem->set([
-            'headers' => $event->getResponse()->headers->all(),
-            'status_code' => $event->getResponse()->getStatusCode(),
-            'content' => $event->getResponse()->getContent()
+            'headers'       => $event->getResponse()->headers->all(),
+            'status_code'   => $event->getResponse()->getStatusCode(),
+            'content'       => $event->getResponse()->getContent()
         ]);
 
         if ($pool->save($cachedItem)) {
             $this->getLogger()->debug(
-                'A cacheable value has been persisted to cache, key={key}.',
-                ['key' => $cachedItem->getKey()]
-            );
+                'A value has been saved to cache. pool={pool}; key={key};', [
+                    'key' => $cachedItem->getKey(),
+                    'pool' => $cacheable->pool,
+                ]);
         } else {
             $this->getLogger()->error(
-                'Could not persist cacheable value to cache, key={key}.',
-                ['key' => $cachedItem->getKey()]
-            );
+                'Could not persist value to cache. pool={pool}; key={key};', [
+                    'key' => $cachedItem->getKey(),
+                    'pool' => $cacheable->pool,
+                ]);
         }
 
         $this->releaseLockIfNeeded($event->getRequest());
@@ -122,11 +126,21 @@ final class CacheableService extends AbstractService implements CacheableService
     public function releaseLockIfNeeded(Request $request): void
     {
         if ($request->attributes->has(Cacheable::REQUEST_LOCK)) {
+            /** @var CacheItemInterface $cachedItem */
+            $cachedItem = $request->attributes->get(Cacheable::REQUEST_CACHED_ITEM);
+
+            /** @var Cacheable $cacheable */
+            $cacheable = $request->attributes->get(Cacheable::REQUEST_ATTRIBUTE);
+
             /** @var LockInterface $lock */
             $lock = $request->attributes->get(Cacheable::REQUEST_LOCK);
             $lock->release();
             $request->attributes->remove(Cacheable::REQUEST_LOCK);
-            $this->getLogger()->debug('The lock has been released.');
+
+            $this->getLogger()->debug('The lock has been released. pool={pool}; key={key};', [
+                'key' => $cachedItem->getKey(),
+                'pool' => $cacheable->pool,
+            ]);
         }
     }
 
@@ -147,26 +161,36 @@ final class CacheableService extends AbstractService implements CacheableService
 
     private function createLock(Request $request, string $keyHash, CacheItemPoolInterface $pool, CacheItemInterface $cacheItem, Cacheable $cacheable): void
     {
-        $lock = $this->lockFactory->createLock($keyHash, 30, false);
+        $lock = $this->lockFactory->createLock($keyHash, 30.0, false);
         if ($lock->acquire(false)) {
             $this->getLogger()
-                ->debug('A lock has been created for a cache value computation.', ['key' => $keyHash]);
+                ->debug('A lock has been created for a cache computation. pool={pool}; key={key};', [
+                    'key' => $keyHash,
+                    'pool' => $cacheable->pool,
+                ]);
             $request->attributes->set(Cacheable::REQUEST_LOCK, $lock);
             $request->attributes->set(Cacheable::REQUEST_POOL_SERVICE, $pool);
             $request->attributes->set(Cacheable::REQUEST_CACHED_ITEM, $cacheItem);
             $request->attributes->set(Cacheable::REQUEST_ATTRIBUTE, $cacheable);
         } else {
-            $this->getLogger()->debug('Could not create a lock for a cache computation.', ['key' => $keyHash]);
+            $this->getLogger()
+                ->debug('Could not create a lock for a cache computation. pool={pool}; key={key};', [
+                    'key' => $keyHash,
+                    'pool' => $cacheable->pool,
+                ]);
         }
     }
 
-    private function createResponseFromCacheItem(CacheItemInterface $cacheItem, float $startCacheOperations): Response
+    private function createResponseFromCacheItem(CacheItemInterface $cacheItem, Cacheable $cacheable, float $startCacheOperations): Response
     {
         $cachedResponse = $cacheItem->get();
         $cacheOperationsTime = \microtime(true) - $startCacheOperations;
         $this->getLogger()
-            ->debug('Reading the cacheable value from the cache took {took} seconds, key={key}',
-                ['took' => $cacheOperationsTime, 'key' => $cacheItem->getKey()]);
+            ->debug('Cache reading took {took} seconds. pool={pool}; key={key};', [
+                'took' => $cacheOperationsTime,
+                'key' => $cacheItem->getKey(),
+                'pool' => $cacheable->pool,
+            ]);
         return new Response(
             $cachedResponse['content'] ?? '',
             $cachedResponse['status_code'] ?? 200,

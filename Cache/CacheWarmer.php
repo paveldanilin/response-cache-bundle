@@ -16,7 +16,9 @@ class CacheWarmer implements CacheWarmerInterface
     private LoggerInterface $logger;
     private string $scanDir;
 
-    public function __construct(string $scanDir, CacheableServiceInterface $service, EvictServiceInterface $evictService)
+    public function __construct(string                    $scanDir,
+                                CacheableServiceInterface $service,
+                                EvictServiceInterface     $evictService)
     {
         $this->scanDir = $scanDir;
         $this->logger = new NullLogger();

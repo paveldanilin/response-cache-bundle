@@ -5,8 +5,6 @@ namespace Pada\ResponseCacheBundle\Service;
 use Pada\Reflection\Scanner\ClassInfo;
 use Pada\Reflection\Scanner\ScannerInterface;
 use Pada\ResponseCacheBundle\Controller\Annotation\AbstractAnnotation;
-use Pada\ResponseCacheBundle\Controller\Annotation\Cacheable;
-use Pada\ResponseCacheBundle\Controller\Annotation\CacheEvict;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -17,21 +15,21 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 abstract class AbstractService
 {
-    private const CACHE_PREFIX = 'pada_response_cache_';
+    private const CACHE_PREFIX = 'pada_rc_';
 
     private LoggerInterface $logger;
     private ScannerInterface $metaScanner;
     private CacheItemPoolInterface $cacheSystem;
-    private ContainerInterface $container;
+    private ContainerInterface $locator;
 
-    public function __construct(ScannerInterface $metaScanner,
+    public function __construct(ScannerInterface       $metaScanner,
                                 CacheItemPoolInterface $cacheSystem,
-                                ContainerInterface $container)
+                                ContainerInterface     $locator)
     {
         $this->logger = new NullLogger();
         $this->metaScanner = $metaScanner;
         $this->cacheSystem = $cacheSystem;
-        $this->container = $container;
+        $this->locator = $locator;
     }
 
     abstract protected function doWarmUpSystemCache(ClassInfo $classInfo, string $methodName): void;
@@ -89,7 +87,7 @@ abstract class AbstractService
      */
     protected function findPool(string $poolId): CacheItemPoolInterface
     {
-        $pool = $this->container->get($poolId);
+        $pool = $this->locator->get($poolId);
         if (null === $pool) {
             throw new \RuntimeException(\sprintf('A cache pool not found [%s]', $poolId));
         }
