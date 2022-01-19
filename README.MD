@@ -29,9 +29,12 @@ response_cache:
 ## Usage
 
 ### @Cacheable
-`@Cacheable(pool=<cache.pool.name>, key=<item.key.name>, ttl=<expires.after.sec>, condition=<request.condition.expression>)`
-
 The simplest way to enable caching behavior for a method is to demarcate it with @Cacheable annotation.
+
+```php
+@Cacheable(pool="<cache.pool.name>", key="<item.key.name>", ttl="<expires.after.sec>", condition="<request.condition.expression>")
+```
+
 The default parameters:
 - `key` - a concatenated class name with a method name: `App\Controller\MyController_doHeavyComputation`
 - `pool` - `cache.app`
