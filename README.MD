@@ -70,13 +70,45 @@ The dynamic key starts from the '#' sign i.e. `#<expression>`.
 
 [Symfony expression language](https://symfony.com/doc/current/components/expression_language/syntax.html) is used for the dynamic key computation.
 
-The following variables can be used in the expression:
-- `request` - the inbound request object (`\Symfony\Component\HttpFoundation\Request`)
-- `query` - query parameters (`$request->query->all()`)
-- `params` - route parameters (`$request->attributes->all()['_route_params']`)
+The following variables and functions can be used in the expression:
 
-For example: `@Cacheable(key='#request.getMethod()~request.getRequestUri()')`
+| Variable       | Description                | Type                                      |
+|----------------|----------------------------|-------------------------------------------|
+| request        | Inbound request object     | \Symfony\Component\HttpFoundation\Request |
+| query_params   | Request query parameters   | array<key, value>                         |
+ | route_params   | Request route parameters   | array<key, value>                         |
+ | request_method | Http request method        | string                                    |
+ | request_uri    | Request URI                | string                                    |
+ | request_locale | Request Locale             | string                                    |
 
+
+| Function                 | Description                                              |
+|--------------------------|----------------------------------------------------------|
+| query_val(key, def = '') | * *key* string or array of strings<br/>  * *def* string  |
+| route_val(key, def = '') | * *key* string or array of strings<br/>  * *def* string  |
+
+
+Examples:
+
+```php
+@Cacheable(key="#request.getMethod()~request.getRequestUri()")
+```
+
+```php
+@Cacheable(key="#query_val('id', 'def_value')")
+```
+
+```php
+@Cacheable(key="#query_val(['id', 'x_query_param'])")
+```
+
+```php
+@Cacheable(key="#route_val('id')")
+```
+
+```php
+@Cacheable(key="#route_val(['id', 'x_route_param'])")
+```
 
 #### Pool
 

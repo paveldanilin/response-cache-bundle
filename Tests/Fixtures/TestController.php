@@ -48,13 +48,23 @@ class TestController
     }
 
     /**
-     * @Cacheable(key="#knvl(query, 'first_name')~knvl(query, 'last_name')")
+     * @Cacheable(key="#query_val('first_name')~query_val('last_name')")
      * @param Request $request
      * @return Response
      */
     public function getDynamicKeyQuery(Request $request): Response
     {
         return new Response('DATA', 200);
+    }
+
+    /**
+     * @Cacheable(key="#query_val(['first_name', 'last_name'])")
+     * @param Request $request
+     * @return Response
+     */
+    public function getDynamicKeyQueryWithFunc(Request $request): Response
+    {
+        return new Response('DATA', 301);
     }
 
     /**

@@ -56,6 +56,17 @@ class ControllerCacheListenerTest extends BundleTestCase
         self::assertArrayHasKey(\md5('PavelDanilin'), $this->cacheApp->getValues());
     }
 
+    public function testDynamicKeyQueryWithFunc(): void
+    {
+        $this->invokeMethod(
+            '/api/v1/data/static/key?first_name=Pavel&last_name=Danilin',
+            'GET',
+            'getDynamicKeyQueryWithFunc'
+        );
+
+        self::assertArrayHasKey(\md5('PavelDanilin'), $this->cacheApp->getValues());
+    }
+
     public function testSkipCacheByCondition(): void
     {
         $this->invokeMethod(
