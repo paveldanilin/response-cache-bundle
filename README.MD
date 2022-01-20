@@ -32,7 +32,12 @@ response_cache:
 The simplest way to enable caching behavior for a method is to demarcate it with @Cacheable annotation.
 
 ```php
-@Cacheable(pool="<cache.pool.name>", key="<item.key.name>", ttl="<expires.after.sec>", condition="<request.condition.expression>")
+@Cacheable(
+    pool="<cache.pool.name>",
+    key="<item.key.name>",
+    ttl="<expires.after.sec>",
+    condition="<request.condition.expression>"
+)
 ```
 
 The default parameters:
