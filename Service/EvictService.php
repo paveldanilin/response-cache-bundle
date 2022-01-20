@@ -34,9 +34,15 @@ final class EvictService extends AbstractService implements EvictServiceInterfac
 
                 if ($pool->deleteItem($keyHash)) {
                     $this->getLogger()
-                        ->debug('A value with the key={key} has been evicted.', ['key' => $keyHash]);
+                        ->debug('A value has been evicted. pool={pool}; key={key};', [
+                            'key' => $keyHash,
+                            'pool' => $annotation->pool,
+                        ]);
                 } else {
-                    $this->getLogger()->debug('Could not evict unknown key={key}.', ['key' => $keyHash]);
+                    $this->getLogger()->debug('Could not evict unknown key. pool={pool}; key={key};', [
+                        'key' => $keyHash,
+                        'pool' => $annotation->pool
+                    ]);
                 }
             }
         } catch (\Exception $e) {
