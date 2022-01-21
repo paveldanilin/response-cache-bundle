@@ -59,7 +59,11 @@ final class CacheableService extends AbstractService implements CacheableService
 
         $this->lockFactory->setLogger($this->getLogger());
 
-        $keyHash = $this->keyGenerator->generate($cacheable->key, $event->getRequest());
+        if ($cacheable->skipKeyGen) {
+            $keyHash = $cacheable->key;
+        } else {
+            $keyHash = $this->keyGenerator->generate($cacheable->key, $event->getRequest());
+        }
 
         $startCacheOperations = \microtime(true); // @see createResponseFromCacheItem
         $pool = $this->findPool($cacheable->pool);

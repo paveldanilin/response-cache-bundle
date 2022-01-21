@@ -98,6 +98,13 @@ class ControllerCacheListenerTest extends BundleTestCase
         self::assertArrayNotHasKey($key, $this->cacheApp->getValues());
     }
 
+    public function testCreateKeyWithoutKeyGeneration(): void
+    {
+        $this->invokeMethod('/api/v1/data/static', 'GET', 'createKeyWithoutKeyGeneration');
+
+        self::assertArrayHasKey('123321', $this->cacheApp->getValues());
+    }
+
     private function invokeMethod(string $uri, string $httpMethod, string $controllerMethod): void
     {
         $request = $this->createRequest($uri, $httpMethod);

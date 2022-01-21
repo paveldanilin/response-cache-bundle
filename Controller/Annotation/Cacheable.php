@@ -22,6 +22,7 @@ class Cacheable extends AbstractAnnotation
     {
         $this->extractPool($data);
         $this->extractKey($data);
+        $this->extractSkipKeyGen($data);
         $this->ttl = $this->extractTtl($data);
         $this->condition = $this->extractCondition($data);
     }

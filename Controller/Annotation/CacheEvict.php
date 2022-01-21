@@ -16,5 +16,6 @@ class CacheEvict extends AbstractAnnotation
     {
         $this->extractPool($data);
         $this->extractKey($data);
+        $this->extractSkipKeyGen($data);
     }
 }

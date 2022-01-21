@@ -28,7 +28,12 @@ final class EvictService extends AbstractService implements EvictServiceInterfac
         try {
             $annotation = $this->getAnnotationFromSystemCache($controllerClassName, $method);
             if (null !== $annotation) {
-                $keyHash = $this->keyGenerator->generate($annotation->key, $event->getRequest());
+
+                if ($annotation->skipKeyGen) {
+                    $keyHash = $annotation->key;
+                } else {
+                    $keyHash = $this->keyGenerator->generate($annotation->key, $event->getRequest());
+                }
 
                 $pool = $this->findPool($annotation->pool);
 

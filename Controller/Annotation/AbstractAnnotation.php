@@ -8,6 +8,7 @@ abstract class AbstractAnnotation
 
     public string $pool = self::DEFAULT_APP_CACHE_POOL;
     public string $key = '';
+    public bool $skipKeyGen = false;
 
     protected function extractPool(array $data): void
     {
@@ -18,7 +19,8 @@ abstract class AbstractAnnotation
     }
 
     /**
-     *
+     * 'my_key' - static key
+     * '#route_val('id')' - dynamic key
      * @see https://symfony.com/doc/current/components/expression_language.html#expression-syntax
      * @param array $data
      * @return void
@@ -26,5 +28,10 @@ abstract class AbstractAnnotation
     protected function extractKey(array $data): void
     {
         $this->key = \trim($data['key'] ?? '');
+    }
+
+    protected function extractSkipKeyGen(array $data): void
+    {
+        $this->skipKeyGen = $data['skipKeyGen'] ?? false;
     }
 }

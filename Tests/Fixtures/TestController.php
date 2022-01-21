@@ -93,4 +93,13 @@ class TestController
     {
         return new Response('DATA', 200);
     }
+
+    /**
+     * @Cacheable(key="123321", skipKeyGen=true)
+     * @return Response
+     */
+    public function createKeyWithoutKeyGeneration(): Response
+    {
+        return new Response('DATA', 200);
+    }
 }
