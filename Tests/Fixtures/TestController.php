@@ -95,7 +95,7 @@ class TestController
     }
 
     /**
-     * @Cacheable(key="123321", skipKeyGen=true)
+     * @Cacheable(key="123321", keyHashFunc=null)
      * @return Response
      */
     public function createKeyWithoutKeyGeneration(): Response

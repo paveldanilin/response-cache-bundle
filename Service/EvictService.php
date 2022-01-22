@@ -29,23 +29,19 @@ final class EvictService extends AbstractService implements EvictServiceInterfac
             $annotation = $this->getAnnotationFromSystemCache($controllerClassName, $method);
             if (null !== $annotation) {
 
-                if ($annotation->skipKeyGen) {
-                    $keyHash = $annotation->key;
-                } else {
-                    $keyHash = $this->keyGenerator->generate($annotation->key, $event->getRequest());
-                }
+                $cacheKey = $this->keyGenerator->generate($annotation->key, $event->getRequest(), $annotation->keyHashFunc);
 
                 $pool = $this->findPool($annotation->pool);
 
-                if ($pool->deleteItem($keyHash)) {
+                if ($pool->deleteItem($cacheKey)) {
                     $this->getLogger()
                         ->debug('A value has been evicted. pool={pool}; key={key};', [
-                            'key' => $keyHash,
+                            'key' => $cacheKey,
                             'pool' => $annotation->pool,
                         ]);
                 } else {
                     $this->getLogger()->debug('Could not evict unknown key. pool={pool}; key={key};', [
-                        'key' => $keyHash,
+                        'key' => $cacheKey,
                         'pool' => $annotation->pool
                     ]);
                 }

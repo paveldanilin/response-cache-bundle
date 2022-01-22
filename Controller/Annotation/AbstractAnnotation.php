@@ -4,11 +4,26 @@ namespace Pada\ResponseCacheBundle\Controller\Annotation;
 
 abstract class AbstractAnnotation
 {
+    public const DEFAULT_KEY_HASH_FUNC = 'md5';
     public const DEFAULT_APP_CACHE_POOL = 'cache.app';
 
+    /**
+     * A Symfony pool name.
+     * @var string
+     */
     public string $pool = self::DEFAULT_APP_CACHE_POOL;
+    /**
+     * A key of the cached item.
+     * Can be static or dynamic.
+     * @var string
+     */
     public string $key = '';
-    public bool $skipKeyGen = false;
+    /**
+     * Default value: 'md5'
+     * @var string|callable
+     */
+    public $keyHashFunc = self::DEFAULT_KEY_HASH_FUNC;
+
 
     protected function extractPool(array $data): void
     {
@@ -30,8 +45,12 @@ abstract class AbstractAnnotation
         $this->key = \trim($data['key'] ?? '');
     }
 
-    protected function extractSkipKeyGen(array $data): void
+    protected function extractKeyHashFunc(array $data): void
     {
-        $this->skipKeyGen = $data['skipKeyGen'] ?? false;
+        if (\array_key_exists('keyHashFunc', $data)) {
+            $this->keyHashFunc = $data['keyHashFunc'];
+        } else {
+            $this->keyHashFunc = self::DEFAULT_KEY_HASH_FUNC;
+        }
     }
 }

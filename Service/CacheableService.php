@@ -59,28 +59,24 @@ final class CacheableService extends AbstractService implements CacheableService
 
         $this->lockFactory->setLogger($this->getLogger());
 
-        if ($cacheable->skipKeyGen) {
-            $keyHash = $cacheable->key;
-        } else {
-            $keyHash = $this->keyGenerator->generate($cacheable->key, $event->getRequest());
-        }
+        $cacheKey = $this->keyGenerator->generate($cacheable->key, $event->getRequest(), $cacheable->keyHashFunc);
 
         $startCacheOperations = \microtime(true); // @see createResponseFromCacheItem
         $pool = $this->findPool($cacheable->pool);
-        $cacheItem = $pool->getItem($keyHash);
+        $cacheItem = $pool->getItem($cacheKey);
 
         if ($cacheItem->isHit()) {
             // Replace controller handler
             $event->setController(fn() => $this->createResponseFromCacheItem($cacheItem, $cacheable, $startCacheOperations));
             $this->getLogger()
                 ->debug('A response has been created from the cache. pool={pool}; key={key};', [
-                    'key' => $keyHash,
+                    'key' => $cacheKey,
                     'pool' => $cacheable->pool,
                 ]);
             return;
         }
 
-        $this->createLock($event->getRequest(), $keyHash, $pool, $cacheItem, $cacheable);
+        $this->createLock($event->getRequest(), $cacheKey, $pool, $cacheItem, $cacheable);
     }
 
     public function updateCacheIfNeeded(ResponseEvent $event): void

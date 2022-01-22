@@ -13,14 +13,20 @@ final class KeyGenerator implements KeyGeneratorInterface
         $this->expression = $expression;
     }
 
-    public function generate(string $key, Request $request): string
+    /**
+     * @param string $key
+     * @param Request $request
+     * @param string|callable $keyHashFunc
+     * @return string
+     */
+    public function generate(string $key, Request $request, $keyHashFunc): string
     {
         if ($this->isKeyDynamic($key)) {
             $k = (string)$this->expression->evaluateOnRequest($this->normalize($key), $request);
         } else {
             $k = $key; // Static key
         }
-        return \md5($k);
+        return $this->createHash($k, $keyHashFunc);
     }
 
     public function isKeyDynamic(string $key): bool
@@ -31,5 +37,18 @@ final class KeyGenerator implements KeyGeneratorInterface
     public function normalize(string $key): string
     {
         return \ltrim($key, '#');
+    }
+
+    /**
+     * @param string $key
+     * @param string|callable $hashFunc
+     * @return string
+     */
+    private function createHash(string $key, $hashFunc): string
+    {
+        if (empty($hashFunc) || !\is_callable($hashFunc)) {
+            return $key;
+        }
+        return $hashFunc($key);
     }
 }

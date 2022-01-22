@@ -8,5 +8,12 @@ interface KeyGeneratorInterface
 {
     public function isKeyDynamic(string $key): bool;
     public function normalize(string $key): string;
-    public function generate(string $key, Request $request): string;
+
+    /**
+     * @param string $key
+     * @param Request $request
+     * @param string|callable $keyHashFunc
+     * @return string
+     */
+    public function generate(string $key, Request $request, $keyHashFunc): string;
 }
