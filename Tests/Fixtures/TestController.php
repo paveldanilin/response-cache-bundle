@@ -98,8 +98,22 @@ class TestController
      * @Cacheable(key="123321", keyHashFunc=null)
      * @return Response
      */
-    public function createKeyWithoutKeyGeneration(): Response
+    public function createUnhashedKey(): Response
     {
         return new Response('DATA', 200);
+    }
+
+    /**
+     * @Cacheable(key="test", keyHashFunc="Pada\ResponseCacheBundle\Tests\Fixtures\TestController::hash")
+     * @return Response
+     */
+    public function customKeyHash(): Response
+    {
+        return new Response('DATA');
+    }
+
+    public static function hash(string $s): string
+    {
+        return \hash('SHA256', $s);
     }
 }
