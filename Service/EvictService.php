@@ -40,7 +40,7 @@ final class EvictService extends AbstractService implements EvictServiceInterfac
                             'pool' => $annotation->pool,
                         ]);
                 } else {
-                    $this->getLogger()->debug('Could not evict unknown key. pool={pool}; key={key};', [
+                    $this->getLogger()->warning('Something went wrong while deleting the item. pool={pool}; key={key};', [
                         'key' => $cacheKey,
                         'pool' => $annotation->pool
                     ]);
