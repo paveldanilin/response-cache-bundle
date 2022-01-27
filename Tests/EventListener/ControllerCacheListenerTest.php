@@ -109,12 +109,41 @@ class ControllerCacheListenerTest extends BundleTestCase
     {
         $this->invokeMethod('/api/v1/data/custom/hash', 'GET', 'customKeyHash');
 
-        self::assertArrayHasKey(\hash('SHA256', 'test'), $this->cacheApp->getValues());
+        self::assertArrayHasKey((string)\hash('SHA256', 'test'), $this->cacheApp->getValues());
+    }
+
+    public function testBody(): void
+    {
+        $body = '{"test": 1}';
+        $this->invokePostMethod('/api/v1/test/body', 'testBody', $body);
+
+        self::assertArrayHasKey(\md5($body), $this->cacheApp->getValues());
+    }
+
+    public function testBodyJson(): void
+    {
+        $body = '{"account": {"id": 77707771}, "req_uuid": "test"}';
+        $this->invokePostMethod('/api/v1/test/body/json', 'testBodyJson', $body);
+
+        self::assertArrayHasKey(\md5('77707771test'), $this->cacheApp->getValues());
     }
 
     private function invokeMethod(string $uri, string $httpMethod, string $controllerMethod): void
     {
         $request = $this->createRequest($uri, $httpMethod);
+
+        $controllerEvent = $this->createControllerEvent(new TestController(), $controllerMethod, $request);
+        $this->controllerCacheListener->onKernelController($controllerEvent);
+
+        $handler = $controllerEvent->getController();
+        $response = $handler($request);
+
+        $this->responseCacheListener->onKernelResponse($this->createResponseEvent($request, $response));
+    }
+
+    private function invokePostMethod(string $uri, string $controllerMethod, ?string $content = null): void
+    {
+        $request = $this->createRequest($uri, 'POST', [], $content);
 
         $controllerEvent = $this->createControllerEvent(new TestController(), $controllerMethod, $request);
         $this->controllerCacheListener->onKernelController($controllerEvent);

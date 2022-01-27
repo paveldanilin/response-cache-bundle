@@ -112,6 +112,24 @@ class TestController
         return new Response('DATA');
     }
 
+    /**
+     * @Cacheable(key="#body()")
+     * @return Response
+     */
+    public function testBody(): Response
+    {
+        return new Response('DATA');
+    }
+
+    /**
+     * @Cacheable(key="#body_json('account.id')~body_json('req_uuid')")
+     * @return Response
+     */
+    public function testBodyJson(): Response
+    {
+        return new Response('DATA');
+    }
+
     public static function hash(string $s): string
     {
         return \hash('SHA256', $s);

@@ -82,19 +82,18 @@ The following variables and functions can be used in the expression:
 
 | Variable       | Description                | Type                                      |
 |----------------|----------------------------|-------------------------------------------|
-| request        | Inbound request object     | \Symfony\Component\HttpFoundation\Request |
-| query_params   | Request query parameters   | array<key, value>                         |
- | route_params   | Request route parameters   | array<key, value>                         |
+| request        | Inbound request object     | \Symfony\Component\HttpFoundation\Request |                   |
  | request_method | Http request method        | string                                    |
  | request_uri    | Request URI                | string                                    |
  | request_locale | Request Locale             | string                                    |
 
 
-| Function                 | Description                                              |
-|--------------------------|----------------------------------------------------------|
-| query_val(key, def = '') | * *key* string or array of strings<br/>  * *def* string  |
-| route_val(key, def = '') | * *key* string or array of strings<br/>  * *def* string  |
-
+| Function                  | Description                                                |
+|---------------------------|------------------------------------------------------------|
+| query_val(key, def = '')  | * *key* string or array of strings<br/>  * *def* string    |
+| route_val(key, def = '')  | * *key* string or array of strings<br/>  * *def* string    |
+| body()                    | Returns a request body content                             |
+| body_json(path, def = '') | Decodes a request body as json and returns the path value. |
 
 Examples:
 
@@ -116,6 +115,11 @@ Examples:
 
 ```php
 @Cacheable(key="#route_val(['id', 'x_route_param'])")
+```
+
+```php
+// Request body: {"account": {"id": 123}}
+@Cacheable(key=#body_json('account.id')"")
 ```
 
 #### Pool
