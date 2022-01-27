@@ -119,7 +119,7 @@ Examples:
 
 ```php
 // Request body: {"account": {"id": 123}}
-@Cacheable(key=#body_json('account.id')"")
+@Cacheable(key="#body_json('account.id')")
 ```
 
 #### Pool
