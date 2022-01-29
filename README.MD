@@ -124,7 +124,7 @@ Examples:
 #### Pool
 
 You can [define](https://symfony.com/doc/current/cache.html) your own cache pool and use it instead of the default `cache.app`.
-
+Keep in mind that the cache pool must be defined as public.
 
 #### TTL
 
