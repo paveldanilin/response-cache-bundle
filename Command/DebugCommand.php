@@ -43,37 +43,17 @@ class DebugCommand extends Command
 
         /** @var ClassInfo $classInfo */
         foreach ($this->reflectionScanner->in($this->scanDir) as $classInfo) {
-
             foreach ($classInfo->getMethodNames() as $methodName) {
-                foreach ($classInfo->getMethodAnnotations($methodName) as $methodAnnotation) {
-                    $annotationName = null;
-                    $poolName = '';
-                    $key = '';
-                    $options = [];
-                    $route= '';
-                    if ($methodAnnotation instanceof Cacheable) {
-                        $annotationName = 'Cacheable';
-                        $poolName = $methodAnnotation->pool;
-                        $key = $methodAnnotation->key;
-                        $options[] = "<info>ttl</info>=$methodAnnotation->ttl";
-                        $options[] = "<info>condition</info>=$methodAnnotation->condition";
-                    } else if ($methodAnnotation instanceof CacheEvict) {
-                        $annotationName = 'CacheEvict';
-                        $poolName = $methodAnnotation->pool;
-                        $key = $methodAnnotation->key;
-                    } else if ($methodAnnotation instanceof Route) {
-                        $route = '[' . \implode(',', $methodAnnotation->getMethods()) . '] ' . $methodAnnotation->getPath();
-                    }
-                    if (!empty($annotationName)) {
-                        $rows[] = [
-                            "<info>$annotationName</info>",
-                            $poolName,
-                            $key,
-                            $classInfo->getReflection()->getName() . '::' . $methodName,
-                            $route,
-                            \implode('; ', $options),
-                        ];
-                    }
+                $info = $this->getInfo($classInfo, $methodName);
+                if (\array_key_exists('annotation', $info)) {
+                    $rows[] = [
+                        "<info>{$info['annotation']}</info>",
+                        $info['pool'],
+                        $info['key'],
+                        $classInfo->getReflection()->getName() . '::' . $methodName,
+                        $info['route'],
+                        $info['options'],
+                    ];
                 }
             }
         }
@@ -81,5 +61,28 @@ class DebugCommand extends Command
         $table->setRows($rows)->render();
 
         return 0;
+    }
+
+    private function getInfo(ClassInfo $classInfo, string $methodName): array
+    {
+        $info = [];
+        foreach ($classInfo->getMethodAnnotations($methodName) as $methodAnnotation) {
+            if ($methodAnnotation instanceof Cacheable) {
+                $info['annotation'] = 'Cacheable';
+                $info['pool'] = $methodAnnotation->pool;
+                $info['key'] = $methodAnnotation->key;
+                $options = [];
+                $options[] = "<info>ttl</info>=$methodAnnotation->ttl";
+                $options[] = "<info>condition</info>=$methodAnnotation->condition";
+                $info['options'] = \implode('; ', $options);
+            } else if ($methodAnnotation instanceof CacheEvict) {
+                $info['annotation'] = 'CacheEvict';
+                $info['pool'] = $methodAnnotation->pool;
+                $info['key'] = $methodAnnotation->key;
+            } else if ($methodAnnotation instanceof Route) {
+                $info['route'] = '[' . \implode(',', $methodAnnotation->getMethods()) . '] ' . $methodAnnotation->getPath();
+            }
+        }
+        return $info;
     }
 }
