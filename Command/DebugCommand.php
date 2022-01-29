@@ -53,7 +53,6 @@ class DebugCommand extends Command
                         $annotationName = 'Cacheable';
                         $poolName = $methodAnnotation->pool;
                         $key = $methodAnnotation->key;
-                        $options[] = "<info>key</info>=$methodAnnotation->key";
                         $options[] = "<info>ttl</info>=$methodAnnotation->ttl";
                         $options[] = "<info>condition</info>=$methodAnnotation->condition";
                     } else if ($methodAnnotation instanceof CacheEvict) {
