@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 class DebugCommand extends Command
 {
@@ -37,7 +38,7 @@ class DebugCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $table = new Table($output);
-        $table->setHeaders(['Annotation', 'Pool', 'Key', 'Controller', 'Method', 'Options']);
+        $table->setHeaders(['Annotation', 'Pool', 'Key', 'Controller', 'Route', 'Options']);
         $rows = [];
 
         /** @var ClassInfo $classInfo */
@@ -49,6 +50,7 @@ class DebugCommand extends Command
                     $poolName = '';
                     $key = '';
                     $options = [];
+                    $route= '';
                     if ($methodAnnotation instanceof Cacheable) {
                         $annotationName = 'Cacheable';
                         $poolName = $methodAnnotation->pool;
@@ -59,14 +61,16 @@ class DebugCommand extends Command
                         $annotationName = 'CacheEvict';
                         $poolName = $methodAnnotation->pool;
                         $key = $methodAnnotation->key;
+                    } else if ($methodAnnotation instanceof Route) {
+                        $route = '[' . \implode(',', $methodAnnotation->getMethods()) . '] ' . $methodAnnotation->getPath();
                     }
                     if (!empty($annotationName)) {
                         $rows[] = [
                             "<info>$annotationName</info>",
                             $poolName,
                             $key,
-                            $classInfo->getReflection()->getName(),
-                            $methodName,
+                            $classInfo->getReflection()->getName() . '::' . $methodName,
+                            $route,
                             \implode('; ', $options),
                         ];
                     }
