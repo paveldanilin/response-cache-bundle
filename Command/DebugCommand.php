@@ -37,7 +37,7 @@ class DebugCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $table = new Table($output);
-        $table->setHeaders(['Annotation', 'Class', 'Method']);
+        $table->setHeaders(['Annotation', 'Controller', 'Method', 'Options']);
         $rows = [];
 
         /** @var ClassInfo $classInfo */
@@ -46,16 +46,24 @@ class DebugCommand extends Command
             foreach ($classInfo->getMethodNames() as $methodName) {
                 foreach ($classInfo->getMethodAnnotations($methodName) as $methodAnnotation) {
                     $annotationName = null;
+                    $options = [];
                     if ($methodAnnotation instanceof Cacheable) {
                         $annotationName = 'Cacheable';
+                        $options[] = "<info>pool</info>=$methodAnnotation->pool";
+                        $options[] = "<info>key</info>=$methodAnnotation->key";
+                        $options[] = "<info>ttl</info>=$methodAnnotation->ttl";
+                        $options[] = "<info>condition</info>=$methodAnnotation->condition";
                     } else if ($methodAnnotation instanceof CacheEvict) {
                         $annotationName = 'CacheEvict';
+                        $options[] = "<info>pool</info>=$methodAnnotation->pool";
+                        $options[] = "<info>key</info>=$methodAnnotation->key";
                     }
                     if (!empty($annotationName)) {
                         $rows[] = [
-                            $annotationName,
+                            "<info>$annotationName</info>",
                             $classInfo->getReflection()->getName(),
                             $methodName,
+                            \implode(';', $options),
                         ];
                     }
                 }
