@@ -25,7 +25,6 @@ response_cache:
 
 `controller.dir`: A controller directory for annotation scan.
 
-
 ## Usage
 
 ### @Cacheable
@@ -141,3 +140,8 @@ takes a Symfony expression and ensures that the results are cached based on eval
 
 ### @CacheEvict
 `@CacheEvict(pool=<cache.pool.name>, key=<item.key.name>)`
+
+
+## Console command
+- `php ./bin/console debug:response-cache`
+![console-output.png](console-output.png)
