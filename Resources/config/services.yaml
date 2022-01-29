@@ -13,6 +13,16 @@ services:
     arguments: ['@response_cache_bundle_expression_service']
 
   # ---
+  # Console command
+  Pada\ResponseCacheBundle\Command\DebugCommand:
+    public: true
+    calls:
+      - setScanDir: [ '%kernel.project_dir%/src' ]
+      - setReflectionScanner: [ '@response_cache_bundle_reflection_scanner' ]
+    tags:
+      - { name: 'console.command', command: 'debug:response-cache' }
+
+  # ---
   # Cacheable Service
   response_cache_bundle_cacheable_service:
     class: Pada\ResponseCacheBundle\Service\CacheableService

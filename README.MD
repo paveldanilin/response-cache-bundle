@@ -1,9 +1,9 @@
 # A set of Symfony controller cache annotations
 
-| Annotation  | Description                                                                                                                                                                                        |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| @Cacheable  | If a key exists in the cache pool and it is not expired returns a cached value instead of a controller action invocation. Otherwise puts in a cache as a result of a controller action invocation. |
-| @CacheEvict | Removes a cached value from a cache pool.                                                                                                                                                          |
+| Annotation  | Description                                                                                                                                                                                                                  |
+|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| @Cacheable  | If a key exists in the cache pool and it is not expired returns a cached value instead of a controller action invocation. Otherwise passes to a controller action and puts into the cache pool the result of the invocation. |
+| @CacheEvict | Removes a cached value from a cache pool.                                                                                                                                                                                    |
 
 ## Install
 
