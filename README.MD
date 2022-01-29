@@ -77,7 +77,7 @@ The dynamic key starts from the '#' sign i.e. `#<expression>`.
 
 [Symfony expression language](https://symfony.com/doc/current/components/expression_language/syntax.html) is used for the dynamic key computation.
 
-The following variables and functions can be used in the expression:
+The following variables can be used in the expression:
 
 | Variable       | Description                | Type                                      |
 |----------------|----------------------------|-------------------------------------------|
@@ -86,6 +86,8 @@ The following variables and functions can be used in the expression:
  | request_uri    | Request URI                | string                                    |
  | request_locale | Request Locale             | string                                    |
 
+
+The functions can be used in the expression:
 
 | Function                  | Description                                                |
 |---------------------------|------------------------------------------------------------|
@@ -118,6 +120,7 @@ Examples:
 
 ```php
 // Request body: {"account": {"id": 123}}
+// The resolved key: 123
 @Cacheable(key="#body_json('account.id')")
 ```
 
