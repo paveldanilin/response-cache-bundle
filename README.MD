@@ -28,7 +28,7 @@ response_cache:
 ## Usage
 
 ### @Cacheable
-The simplest way to enable caching behavior for a method is to demarcate it with @Cacheable annotation.
+Enables caching behavior for a controller action method.
 
 ```php
 @Cacheable(
