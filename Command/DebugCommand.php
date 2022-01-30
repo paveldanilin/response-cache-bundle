@@ -10,6 +10,7 @@ use Pada\ResponseCacheBundle\Controller\Annotation\CacheEvict;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -33,12 +34,35 @@ class DebugCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Shows controllers and actions that use the @Cacheable or @CacheEvict annotation');
+        $this->addOption('options', 'o', InputOption::VALUE_NONE, 'Display options', false);
+        $this->addOption('controller', 'c', InputOption::VALUE_NONE, 'Display controller and action', false);
+        $this->addOption('route', 'r', InputOption::VALUE_NONE, 'Display route', false);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $optController = false !== $input->getOption('controller');
+        $optOptions = false !== $input->getOption('options');
+        $optRoute = false !== $input->getOption('route');
+
+        if (!$optController && !$optRoute) {
+            $optRoute = true;
+        }
+
+        $headers = ['Annotation', 'Pool', 'Key'];
+
+        if ($optController) {
+            $headers[] = 'Controller';
+        }
+        if ($optRoute) {
+            $headers[] = 'Route';
+        }
+        if ($optOptions) {
+            $headers[] = 'Options';
+        }
+
         $table = new Table($output);
-        $table->setHeaders(['Annotation', 'Pool', 'Key', 'Controller', 'Route', 'Options']);
+        $table->setHeaders($headers);
         $rows = [];
 
         /** @var ClassInfo $classInfo */
@@ -49,16 +73,23 @@ class DebugCommand extends Command
                     $rows[] = [
                         "<info>{$info['annotation']}</info>",
                         $info['pool'] ?? '',
-                        $info['key'] ?? '',
-                        $classInfo->getReflection()->getName() . '::' . $methodName,
-                        $info['route'] ?? '',
-                        $info['options'] ?? '',
+                        $info['key'] ?? ''
                     ];
+                    if ($optController) {
+                        $rows[] = $classInfo->getReflection()->getName() . '::' . $methodName;
+                    }
+                    if ($optRoute) {
+                        $rows[] = $info['route'] ?? '';
+                    }
+                    if ($optOptions) {
+                        $rows[] = $info['options'] ?? '';
+                    }
                 }
             }
         }
 
-        $table->setRows($rows)->render();
+        $table->setRows($rows)
+            ->render();
 
         return 0;
     }
