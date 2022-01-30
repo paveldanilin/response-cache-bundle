@@ -33,7 +33,7 @@ class DebugCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Shows controllers and actions that use the @Cacheable or @CacheEvict annotation');
+        $this->setDescription('Shows controllers and actions that use @Cacheable or @CacheEvict annotations');
         $this->addOption('options', 'o', InputOption::VALUE_NONE, 'Display options');
         $this->addOption('controller', 'c', InputOption::VALUE_NONE, 'Display controller and action');
         $this->addOption('route', 'r', InputOption::VALUE_NONE, 'Display route');
