@@ -48,11 +48,11 @@ class DebugCommand extends Command
                 if (\array_key_exists('annotation', $info)) {
                     $rows[] = [
                         "<info>{$info['annotation']}</info>",
-                        $info['pool'],
-                        $info['key'],
+                        $info['pool'] ?? '',
+                        $info['key'] ?? '',
                         $classInfo->getReflection()->getName() . '::' . $methodName,
-                        $info['route'],
-                        $info['options'],
+                        $info['route'] ?? '',
+                        $info['options'] ?? '',
                     ];
                 }
             }
