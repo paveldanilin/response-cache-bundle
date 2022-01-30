@@ -70,20 +70,21 @@ class DebugCommand extends Command
             foreach ($classInfo->getMethodNames() as $methodName) {
                 $info = $this->getInfo($classInfo, $methodName);
                 if (\array_key_exists('annotation', $info)) {
-                    $rows[] = [
+                    $row = [
                         "<info>{$info['annotation']}</info>",
                         $info['pool'] ?? '',
                         $info['key'] ?? ''
                     ];
                     if ($optController) {
-                        $rows[] = $classInfo->getReflection()->getName() . '::' . $methodName;
+                        $row[] = $classInfo->getReflection()->getName() . '::' . $methodName;
                     }
                     if ($optRoute) {
-                        $rows[] = $info['route'] ?? '';
+                        $row[] = $info['route'] ?? '';
                     }
                     if ($optOptions) {
-                        $rows[] = $info['options'] ?? '';
+                        $row[] = $info['options'] ?? '';
                     }
+                    $rows[] = $row;
                 }
             }
         }
