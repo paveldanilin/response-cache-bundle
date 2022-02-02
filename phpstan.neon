@@ -2,6 +2,7 @@ parameters:
     level: 6
     paths:
         - Cache/
+        - Command/
         - Controller/
         - DependencyInjection/
         - EventListener/
